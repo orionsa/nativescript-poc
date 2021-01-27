@@ -1,0 +1,5 @@
+<!-- <Frame class="app" defaultPage="./pages/main-page/main-page"> -->
+<!-- <Frame class="app" defaultPage="./pages/seekbar-video/seekbar-video"> -->
+<Frame class="app" defaultPage="./pages/new-video-page/video-page">
+<!-- <Frame defaultPage="./components/custom-video/custom-video"> -->
+</Frame>

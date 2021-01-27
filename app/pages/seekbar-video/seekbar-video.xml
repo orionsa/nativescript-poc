@@ -1,0 +1,26 @@
+<Page
+  xmlns="http://schemas.nativescript.org/tns.xsd"
+  navigatingTo="onNavigatingTo"
+  pinch="{{ handlePinch }}"
+>
+  <StackLayout>
+    <StackLayout class="video-container">
+      <Label text="Video Player" />
+    </StackLayout>
+    <FlexboxLayout class="seekbar-container">
+      <Label text="{{ formatSeconds(currentTime) }}" class="time-label"/>
+      <Slider 
+        id="slider"
+        class="slider" 
+        minValue="0" 
+        maxValue="100" 
+        value="{{ sliderValue }}"
+        valueChange="{{ handleSliderChange }}"
+      />
+      <FlexboxLayout class="time-container">
+        <Label text="{{ formatSeconds(startTime) }}" class="time-label time-left"/>
+        <Label text="{{ formatSeconds(endTime) }}" class="time-label time-right"/> 
+      </FlexboxLayout>
+    </FlexboxLayout>
+  </StackLayout>
+</Page>

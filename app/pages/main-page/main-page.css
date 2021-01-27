@@ -1,0 +1,48 @@
+.video-container {
+  width: 338;
+}
+
+.video-player {
+  width: 338;
+  height: 190;
+}
+
+.video-player--mini {
+  height: 149;
+  width: 265;
+  margin-top: 20;
+  margin-bottom: 20;
+}
+
+.pickers {
+  flex-direction: column;
+  height: 70;
+  justify-content: center;
+  color: antiquewhite;
+}
+
+.plus-minus-button-wrapper {
+  align-items: center;
+}
+.single-picker {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plus-minus-button {
+  height: 30;
+  width: 50;
+  padding-top: 4;
+  text-align: center;
+  background-color: #16c4ab;
+  margin-top: 3
+}
+
+.number {
+  margin-left: 10;
+  margin-right: 10;
+}
+
+.hide-player {
+  display: none;
+}

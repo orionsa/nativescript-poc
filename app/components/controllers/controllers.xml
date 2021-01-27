@@ -1,0 +1,14 @@
+<FlexboxLayout class="wrapper" loaded="pageLoaded">
+  <FlexboxLayout class="controllers" orientation="horizontal" >
+    <Button text="Long Press Back" touch="{{ handleTouchBack }}" />
+    <Button text="Long Press Forward" touch="{{ handleTouchForward }}" />
+
+    <!-- <Label id="backButton" text="Back" class="controllers-button controllers-button - - back"/>
+    <Label id="forwardButton" text="Forward" class="controllers-button controllers-button - - forward"/>   -->
+  </FlexboxLayout>
+  <FlexboxLayout class="second-controllers">
+    <Button text="Tap Back" tap="{{ onBack }}" />
+    <Button text="Kill Player" tap="{{ killPlayer }}" />
+    <Button text="Tap Forward" tap="{{ onForward }}" />
+  </FlexboxLayout>
+</FlexboxLayout>

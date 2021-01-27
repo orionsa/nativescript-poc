@@ -1,0 +1,55 @@
+.video-player {
+  height: 190;
+  width: 338;
+  background-color: #ade8f4;
+  margin-top: 20;
+  margin-bottom: 20;
+}
+
+.sprites-seekbar {
+  height: 100;
+  width: 95%;
+  margin: 10;
+  background-color: #caf0f8;
+}
+
+.list-wrapper {
+  width: 100%;
+}
+
+.list {
+  height: 100%;
+  width: 100%;
+  margin-left: 50%;
+}
+
+.list-item {
+  height: 60;
+  width: 80;
+  color: whitesmoke;
+  text-align: center;
+}
+
+.location-indicator {
+  margin: 10;
+  height: 50;
+  background-color: #48cae4;
+}
+
+.location-indicator-labels {
+  color: whitesmoke;
+  justify-content: space-between;
+  padding: 10;
+  padding-top: 0;
+}
+
+.current-time-marker {
+  background-color: #00b4d8;
+  width: 2;
+  height: 100%;
+}
+
+.current-location {
+  height: 40;
+  background-color: #023e8a;
+}

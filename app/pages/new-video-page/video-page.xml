@@ -1,0 +1,50 @@
+<Page
+  xmlns="http://schemas.nativescript.org/tns.xsd"
+  loaded="onPageLoaded"
+>
+  <!-- navigatingTo="onNavigatingTo" -->
+  <StackLayout>
+    <StackLayout class="video-player">
+      <Label text="new video page" />
+    </StackLayout>
+    <StackLayout class="controllers">
+      <GridLayout class="sprites-seekbar">
+        <AbsoluteLayout >
+          <Label left="5" text="{{ formatTime(minSeekDuration) }}" />
+          <Label left="300" text="{{ formatTime(maxSeekDuration) }}" /> 
+        </AbsoluteLayout>
+        <ScrollView id="scrollView" class="list-wrapper" orientation="horizontal" >         
+            <Repeater id="framesView" items="{{ items }}" marginLeft="50%" marginRight="50%" >
+              <Repeater.itemsLayout>
+                <StackLayout class="list" orientation="horizontal" width="{{ framesViewWidth }}" />
+              </Repeater.itemsLayout>
+              <Repeater.itemTemplate>
+                <Label class="list-item" text="{{ $value.index }}" backgroundColor="{{ $value.index % 2 === 0 ? '#023e8a' : '#0077b6' }}"/>
+              </Repeater.itemTemplate>
+            </Repeater>
+        </ScrollView>
+        <AbsoluteLayout horizontalAlignment='center' class="current-time-marker" />
+      </GridLayout>
+      <GridLayout height="20">
+        <Label text="{{ formatTime(currentTime) }}" horizontalAlignment='center' color="white" fontSize="17"/>
+      </GridLayout>
+      <AbsoluteLayout 
+        id="locationBox" 
+        class="location-indicator"
+        pinch="{{ handleLocationPinch }}"
+      >
+        <AbsoluteLayout 
+          pan="{{ handleDragCurrentTime }}" 
+          class="current-location" 
+          top="5" 
+          left="{{ currentLocationLeft }}" 
+          width="{{ currentLocationWidth }}"
+        />  
+      </AbsoluteLayout>
+      <FlexboxLayout class="location-indicator-labels">
+        <Label text="00:00:00" />
+        <Label text="{{ formatTime(duration) }}" />
+      </FlexboxLayout>
+    </StackLayout>
+  </StackLayout>
+</Page>

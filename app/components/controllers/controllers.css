@@ -1,0 +1,28 @@
+.wrapper {
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.controllers {
+  /* background-color: red; */
+  justify-content: space-between;
+}
+
+.second-controllers {
+  /* background-color: aquamarine; */
+  justify-content: space-between;
+}
+
+.controllers-button {
+  background-color: seagreen;
+  height: 80;
+  width: 100;
+}
+
+.controllers-button--back {
+  color: orange;
+}
+
+.controllers-button--forward {
+  color: plum;
+}

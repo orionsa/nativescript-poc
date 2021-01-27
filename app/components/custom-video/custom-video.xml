@@ -1,0 +1,15 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd">
+  <ActionBar title="Native Video" icon=""></ActionBar>
+  <StackLayout>
+    <Placeholder class="video-player" creatingView="createVideoView"/>
+    <FlexboxLayout class="buttons">
+      <Button text="Back" tap="handleBack"/>
+      <Button text="Change Video" tap="handleChangeVideo"/>
+      <Button text="Forward" tap="handleForward"/>
+    </FlexboxLayout>
+    <FlexboxLayout class="buttons">
+      <Button text="Long Back" touch="handleTouchBack" />
+      <Button text="Long Forward" touch="handleTouchForward" />
+    </FlexboxLayout>
+  </StackLayout>
+</Page>

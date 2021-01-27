@@ -1,0 +1,88 @@
+<!--
+The markup in NativeScript apps contains a series of user interface components, each
+of which NativeScript renders with a platform-specific iOS or Android native control.
+You can find a full list of user interface components you can use in your app at
+https://docs.nativescript.org/ui/components.
+-->
+<Page 
+    xmlns="http://schemas.nativescript.org/tns.xsd"
+    xmlns:controllers="/components/controllers"
+    navigatingTo="onNavigatingTo"
+    xmlns:exoplayer="nativescript-exoplayer"
+>
+    <!-- xmlns:VideoPlayer="nativescript-videoplayer" -->
+    <!--
+    The ActionBar is the NativeScript common abstraction over the Android ActionBar and iOS NavigationBar.
+    http://docs.nativescript.org/ui/action-bar
+    -->
+    <ActionBar title="My App" icon=""></ActionBar>
+
+    <!--
+    The StackLayout stacks UI components on the screen—either vertically or horizontally.
+    In this case, the StackLayout does vertical stacking; you can change the stacking to
+    horizontal by applying a orientation="horizontal" attribute to the <StackLayout> element.
+    You can learn more about NativeScript layouts at
+    https://docs.nativescript.org/ui/layout-containers.
+
+    These components make use of the NativeScript core theme, which styles them with element selectors.
+    The theme also provides a set of helper class names such as p-20, h1, h2, and text-center to enhance styling.
+    You can learn more about the NativeScript core theme at https://github.com/nativescript/theme
+    -->
+    <StackLayout class="p-20">
+        <exoplayer:Video 
+            id="nativeexoplayer"
+            class="{{ isFirstPlayerMaster ? 'video-player' : 'video-player--mini' }}"
+            controls="true" 
+            finished="{{ videoFinished }}"
+            loop="true" 
+            autoplay="false" 
+            src="{{ url }}"
+        />
+        <exoplayer:Video 
+            id="nativeexoplayer1"
+            class="{{ !isFirstPlayerMaster ? 'video-player' : 'video-player--mini' }}"
+            visibility="{{ hasSecondPlayer ? 'visible' : 'collapsed' }}"
+            controls="true" 
+            finished="{{ videoFinished }}"
+            loop="true" 
+            autoplay="false" 
+            right="0"
+            top="0"
+            src="{{ secondUrl }}"
+        />
+        <FlexboxLayout>
+            <!-- <Button text="{{ isPlaying ? 'Stop Both' : 'Play Both' }}" tap="{{ handlePlayPause }}" /> -->
+            <Button text="-5 Sec" tap="{{ handleSkipFiveSec }}" direction="back"/>
+            <Button text="Toggle Player" tap="{{ toggleMasterPlayer }}"/>
+            <Button text="Switch Videos" tap="{{ handleSwitchVideos }}"/>
+            <Button text="+5 Sec" tap="{{ handleSkipFiveSec }}" direction="forward"/>
+        </FlexboxLayout>
+
+
+        <controllers:controllers 
+            onForward="{{ handleForward }}" 
+            onBack="{{ handleBack }}"
+            onClear="{{ clearInterval }}" 
+            skipInterval="{{ skipInterval }}"
+            killPlayer="{{ killPlayer }}"
+        />
+        <FlexboxLayout class="pickers">
+            <FlexboxLayout class="single-picker">
+                <Label text="Interval Between each skip"/>
+                <FlexboxLayout class="plus-minus-button-wrapper">
+                    <Label tap="{{ incrementSkipInterval }}" class="plus-minus-button" text="+"/>
+                    <Label class="number" text="{{ skipInterval }}"/>
+                    <Label tap="{{ decrementSkipInterval }}" class="plus-minus-button" text="-"/>
+                </FlexboxLayout>
+            </FlexboxLayout>
+            <FlexboxLayout class="single-picker">
+                <Label text="milliseconds to skip in single interval"/>
+                <FlexboxLayout class="plus-minus-button-wrapper">
+                    <Label tap="{{ incrementSkipLatency }}" class="plus-minus-button" text="+"/>
+                    <Label class="number" text="{{ skipLatency }}"/>
+                    <Label tap="{{ decrementSkipLatency }}" class="plus-minus-button" text="-"/>
+                </FlexboxLayout>
+            </FlexboxLayout>
+        </FlexboxLayout>
+    </StackLayout>
+</Page>

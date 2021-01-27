@@ -1,0 +1,53 @@
+.video-container {
+  height: 190;
+  width: 338;
+  background-color: cadetblue;
+  margin-top: 30;
+}
+
+.seekbar-container {
+  height: 100;
+  /* background-color: coral; */
+  flex-direction: column;
+  justify-content: flex-end;
+  margin: 10;
+  margin-top: 30;
+  align-items: center;
+}
+
+.time-container {
+  /* flex-grow: 1; */
+  justify-content: space-between;
+  /* background-color: crimson; */
+  /* flex-grow: 1; */
+  width: 100%;
+}
+
+.time-label {
+  color: wheat;
+  font-size: 20;
+  margin-top: 10;
+}
+
+.time-left {
+  margin-right: 5;
+}
+
+.time-right {
+  margin-left: 5;
+}
+
+.time-indicator {
+  height: 30;
+  width: 5;
+  background-color: teal;
+  left: 10;
+}
+
+.slider {
+  /* flex-grow: 1; */
+  width: 100%;
+  margin: 0;
+  background-color: brown;
+  /* color: red; */
+}
