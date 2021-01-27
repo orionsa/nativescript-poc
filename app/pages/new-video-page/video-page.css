@@ -6,6 +6,22 @@
   margin-bottom: 20;
 }
 
+.player-controls {
+  height: 50;
+  width: 95%;
+  justify-content: space-between;
+  color: white;
+  align-items: center;
+}
+
+.player-controls-button {
+  width: 50;
+  height: 30;
+  background-color: #0077b6;
+  text-align: center;
+  border-radius: 5;
+}
+
 .sprites-seekbar {
   height: 100;
   width: 95%;

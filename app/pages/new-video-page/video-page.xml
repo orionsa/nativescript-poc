@@ -1,13 +1,43 @@
 <Page
   xmlns="http://schemas.nativescript.org/tns.xsd"
   loaded="onPageLoaded"
+  xmlns:exoplayer="nativescript-exoplayer"
 >
+  <!-- xmlns:VideoPlayer="nativescript-videoplayer" -->
   <!-- navigatingTo="onNavigatingTo" -->
   <StackLayout>
     <StackLayout class="video-player">
+        <exoplayer:Video 
+          id="videoPlayer"
+          controls="true" 
+          finished="{{ videoFinished }}"
+          loop="true" 
+          autoplay="true" 
+          height="280" 
+          src="http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"
+          observeCurrentTime="true"
+          currentTimeUpdated="{{ onTick }}"
+          playbackReady="{{ isReady }}"
+        />
+        <!-- <VideoPlayer:Video 
+          id="videoPlayer"
+          controls="true" 
+          finished="{{ videoFinished }}"
+          loop="true" 
+          autoplay="false" 
+          height="280" 
+          src="http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"
+          observeCurrentTime="true"
+          currentTimeUpdated="{{ onTick }}"
+        /> -->
       <Label text="new video page" />
     </StackLayout>
     <StackLayout class="controllers">
+      <FlexboxLayout class="player-controls">
+        <Label class="player-controls-button" tap="{{ decrementSec }}" text="-1 sec"/>
+        <Label class="player-controls-button" tap="{{ togglePlay }}" text="{{ isPlaying ? 'Pause' : 'Play' }}"/>
+        <Label class="player-controls-button" tap="{{ incrementSec }}" text="+1 sec"/>
+      </FlexboxLayout>
       <GridLayout class="sprites-seekbar">
         <AbsoluteLayout >
           <Label left="5" text="{{ formatTime(minSeekDuration) }}" />
