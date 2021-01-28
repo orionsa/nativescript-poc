@@ -4,7 +4,6 @@
   xmlns:exoplayer="nativescript-exoplayer"
 >
   <!-- xmlns:VideoPlayer="nativescript-videoplayer" -->
-  <!-- navigatingTo="onNavigatingTo" -->
   <StackLayout>
     <StackLayout class="video-player">
         <exoplayer:Video 
@@ -14,7 +13,7 @@
           loop="true" 
           autoplay="true" 
           height="280" 
-          src="http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"
+          src="{{ url }}"
           observeCurrentTime="true"
           currentTimeUpdated="{{ onTick }}"
           playbackReady="{{ isReady }}"
@@ -32,30 +31,25 @@
         /> -->
       <Label text="new video page" />
     </StackLayout>
-    <StackLayout class="controllers">
+    <StackLayout>
       <FlexboxLayout class="player-controls">
         <Label class="player-controls-button" tap="{{ decrementSec }}" text="-1 sec"/>
         <Label class="player-controls-button" tap="{{ togglePlay }}" text="{{ isPlaying ? 'Pause' : 'Play' }}"/>
         <Label class="player-controls-button" tap="{{ incrementSec }}" text="+1 sec"/>
       </FlexboxLayout>
-      <GridLayout class="sprites-seekbar">
-        <AbsoluteLayout >
-          <Label left="5" text="{{ formatTime(minSeekDuration) }}" />
-          <Label left="300" text="{{ formatTime(maxSeekDuration) }}" /> 
-        </AbsoluteLayout>
-        <ScrollView id="scrollView" class="list-wrapper" orientation="horizontal" >         
-            <Repeater id="framesView" items="{{ items }}" marginLeft="50%" marginRight="50%" >
-              <Repeater.itemsLayout>
-                <StackLayout class="list" orientation="horizontal" width="{{ framesViewWidth }}" />
-              </Repeater.itemsLayout>
-              <Repeater.itemTemplate>
-                <Label class="list-item" text="{{ $value.index }}" backgroundColor="{{ $value.index % 2 === 0 ? '#023e8a' : '#0077b6' }}"/>
-              </Repeater.itemTemplate>
-            </Repeater>
+      <GridLayout rows="30 *" class="sprites-seekbar">
+        <FlexboxLayout row="0" justifyContent="space-between" paddingLeft="5" paddingRight="5" backgroundColor="#03045e">
+          <Label color="white" text="{{ formatTime(minSeekDuration) }}" />
+          <Label color="white" text="{{ formatTime(maxSeekDuration) }}" /> 
+        </FlexboxLayout>
+        <ScrollView row="1" id="scrollView" class="list-wrapper" orientation="horizontal" scrollBarIndicatorVisible="true">       
+            <StackLayout id="framesView" orientation="horizontal" paddingLeft="{{ padding }}" paddingRight="{{ padding }}">
+              <AbsoluteLayout width="{{ framesViewWidth }}" height="60" backgroundImage="{{ gradient }}"/>
+            </StackLayout>
         </ScrollView>
-        <AbsoluteLayout horizontalAlignment='center' class="current-time-marker" />
+        <AbsoluteLayout row="1" horizontalAlignment='center' class="current-time-marker" />
       </GridLayout>
-      <GridLayout height="20">
+      <GridLayout height="30">
         <Label text="{{ formatTime(currentTime) }}" horizontalAlignment='center' color="white" fontSize="17"/>
       </GridLayout>
       <AbsoluteLayout 
