@@ -4,8 +4,8 @@
   xmlns:exoplayer="nativescript-exoplayer"
 >
   <!-- xmlns:VideoPlayer="nativescript-videoplayer" -->
-  <StackLayout>
-    <StackLayout class="video-player">
+  <GridLayout rows="auto *">
+    <StackLayout row="0" class="video-player">
         <exoplayer:Video 
           id="videoPlayer"
           controls="true" 
@@ -31,7 +31,7 @@
         /> -->
       <Label text="new video page" />
     </StackLayout>
-    <StackLayout>
+    <StackLayout row="1" pinch="{{ handlePinch }}">
       <FlexboxLayout class="player-controls">
         <Label class="player-controls-button" tap="{{ decrementSec }}" text="-1 sec"/>
         <Label class="player-controls-button" tap="{{ togglePlay }}" text="{{ isPlaying ? 'Pause' : 'Play' }}"/>
@@ -70,5 +70,5 @@
         <Label text="{{ formatTime(duration) }}" />
       </FlexboxLayout>
     </StackLayout>
-  </StackLayout>
+  </GridLayout>
 </Page>

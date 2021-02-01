@@ -63,104 +63,180 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)")
   viewModel.set(PADDING, 0);
 
+
+
   viewModel.handleDragCurrentTime = args => {
-    if (disableDragFlag) {
-      return ;
-    };
     const { state, deltaX } = args;
+
     if (state === 1) {
       cl = viewModel.get(CURRENT_LOCATION_LEFT);
     }
 
     let newLocation = cl + deltaX > 0 ? cl + deltaX : 0;
     const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
-    const wrapperSize = locationBox.getActualSize().width;
-
-    if (newLocation + currentLocationWidth > wrapperSize) {
-      newLocation = wrapperSize - currentLocationWidth;
+    const currentLocationBoxWidth = scrollView.getActualSize().width;
+    if (newLocation + currentLocationWidth >= locationBox.getActualSize().width) {
+      newLocation = currentLocationBoxWidth - currentLocationWidth;
     }
+    viewModel.set(CURRENT_LOCATION_LEFT, newLocation);
+    moveSeekbarAccordingToLocation();
+    // viewModel.set(CURRENT_TIME);
+  }
 
-    viewModel.set(CURRENT_LOCATION_LEFT, newLocation); 
-    // const maxDuration = viewModel.get(MAX_SEEK_DURATION);
-    // const minDuration = viewModel.get(MIN_SEEK_DURATION);
-    // let newCurrentTime = (maxDuration - minDuration) / 2 + minDuration;
+  const calcCurrentTimeFromLocation = ()=> {
+    const msInPixel = calcFramesViewMsInPixel();
+    const offset = scrollView.horizontalOffset;
 
-    // viewModel.set(CURRENT_TIME, ((maxDuration - minDuration) / 2 + minDuration));// looks good;
-    scrollView.off("scroll", handleScroll);
-    // scrollFlag = false;
-    setTimeout(()=> scrollView.on("scroll", handleScroll), 500);// Hack, remove event handler
-    calcLocationBoxTimeRepresentation();
-    moveSeekbarAccordingToPosition();
-  };
-
-  viewModel.handleLocationPinch = args => {
-    const { scale, state } = args;
-    if (state === 1) {
-      disableDragFlag = true;
-    }
-    cw = viewModel.get(CURRENT_LOCATION_WIDTH);
+    let newCurrentTime = msInPixel * offset;
+    // const newCurrentTime = ms / 2 + ;
     
+    viewModel.set(CURRENT_TIME, newCurrentTime);
+
+  }
+
+  const moveSeekbarAccordingToLocation = ()=> {
+    // calcLocationBoxTimeRepresentationNEW();
+    calcCurrentTimeFromLocation();
+    const currentLocationBoxWidth = locationBox.getActualSize().width;
+    const possibleLeft = currentLocationBoxWidth - viewModel.get(CURRENT_LOCATION_WIDTH);
+    const currentLocationLeft = viewModel.get(CURRENT_LOCATION_LEFT);
+    const currentLocationLeftPercent = (currentLocationLeft / possibleLeft) * 100;
+    
+    scrollView.scrollToHorizontalOffset(viewModel.get(FRAMES_VIEW_WIDTH) * (currentLocationLeftPercent / 100)); 
+    
+  }
+
+  const moveSeekbarAccordingToCurrentTime = ()=> {
+    const currentTime = viewModel.get(CURRENT_TIME);
+    const duration = viewModel.get(DURATION);
+    const currentTimePercent = (currentTime / duration) * 100;
+    scrollView.scrollToHorizontalOffset(viewModel.get(FRAMES_VIEW_WIDTH) * (currentTimePercent / 100));
+
+
+  }
+
+  viewModel.handlePinch = args => {
+    const { scale, state } = args;
+    const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
+    let newWidth = currentLocationWidth + ((scale - prevScale) * 50);
+    
+    prevScale = scale.toFixed(2); 
+    if (newWidth > locationBox.getActualSize().width) {
+      newWidth = locationBox.getActualSize().width;
+    }
+
+    if (newWidth <= 0) {
+      newWidth = 0; 
+    }
+
+    viewModel.set(CURRENT_LOCATION_WIDTH, newWidth);
     if (state === 3) {
       setTimeout(()=> {
-        disableDragFlag = false;
+        // disableDragFlag = false;
         prevScale = 1;
       }, 250);
     }
 
+    calcLocationBoxTimeRepresentationNEW(true);
+    calculateFramesViewWidth();
+    moveSeekbarAccordingToCurrentTime();
+    // const ms = calculateLocationBoxTimeRepresentationMs();
+    // console.log(ms);
+  }
 
-    const newWidth = cw - ((scale - prevScale) * (prevScale <= scale ? 50 : 100));
-    viewModel.set(CURRENT_LOCATION_WIDTH, newWidth);
-    prevScale = scale.toFixed(2);
-    calcLocationBoxTimeRepresentation();
+  const calculateLocationBoxTimeRepresentationMs = ()=> {
+    // returns number of milliseconds represented by current location box width;
+    const duration = viewModel.get(DURATION);
+    const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
+    const currentLocationBoxWidth = scrollView.getActualSize().width;
+    const percent = (currentLocationWidth / currentLocationBoxWidth) * 100;
+    const ms = duration * (percent/100);
+    return ms;  
   };
 
-
-  const calcLocationBoxTimeRepresentation = ()=> {
-    const currentLeft = viewModel.get(CURRENT_LOCATION_LEFT);
-    const currentLocationBoxWidth = locationBox.getActualSize().width;
-    const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
-    const percent =  (currentLocationBoxWidth - currentLocationWidth) / currentLocationBoxWidth;// check
-    const trackDurationMS = viewModel.get(DURATION); 
-    const msRepresentation = trackDurationMS - (trackDurationMS * percent);// check
-    const positionRepresentation = currentLeft/currentLocationBoxWidth;
-    const minDuration = trackDurationMS * positionRepresentation;
-    const maxDuration = minDuration + msRepresentation;
-    const newFramesViewWidth = (currentLocationBoxWidth/currentLocationWidth) * currentLocationBoxWidth;// check
+  const calculateLocationBoxMsInPixel = ()=> {
+    // returns number in milliseconds represnted by single pixle inside the location box;
     const duration = viewModel.get(DURATION);
-    const padding = scrollView.getActualSize().width / 2;
-    viewModel.set(PADDING, padding);
-    viewModel.set(GRADIENT, generateGradient(newFramesViewWidth))
-    viewModel.set(FRAMES_VIEW_WIDTH, newFramesViewWidth);
+    const currentLocationBoxWidth = scrollView.getActualSize().width;
+
+    return duration / currentLocationBoxWidth;
+  };
+
+  const calculateCurrentLocationPercent = ()=> {
+    // returns percent number that represents the current percentage of the current location (from currentLocationBox);
+    const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
+    const currentLocationBoxWidth = scrollView.getActualSize().width;
+    const percent = (currentLocationWidth / currentLocationBoxWidth) * 100;
+    
+    return percent;
+  };
+
+  const calcFramesViewMsInPixel = ()=> {
+    // returns number in milliseconds that represents the amount of milliseconds inside single pixel
+    const framesViewWidth = viewModel.get(FRAMES_VIEW_WIDTH);
+    const duration = viewModel.get(DURATION);
+    const msInPixle = duration / framesViewWidth;
+
+    return msInPixle;
+  }
+
+  const calculateFramesViewWidth = ()=> {
+    const scrollViewWidth = scrollView.getActualSize().width;
+    const padding = scrollViewWidth / 2; 
+    const currentLocationWidthPercent = calculateCurrentLocationPercent();
+    const framesViewWidth = scrollViewWidth / (currentLocationWidthPercent / 100);
+    const gradient = generateGradient(framesViewWidth);
+
+    viewModel.set(GRADIENT, gradient);
+    viewModel.set(FRAMES_VIEW_WIDTH, framesViewWidth);
+    viewModel.set(PADDING, padding);  
+  }
+
+  const calcLocationBoxTimeRepresentationNEW = (shouldChangeCurrentTime = false) => {
+    const duration = viewModel.get(DURATION);
+    const currentTime = viewModel.get(CURRENT_TIME);
+    const msRepresentation = calculateLocationBoxTimeRepresentationMs(); 
+
+    let minDuration = currentTime - (msRepresentation / 2);
+    let maxDuration = currentTime + (msRepresentation / 2);
+
+    if (minDuration <= 0) {
+      maxDuration = maxDuration + (minDuration * -1);
+      minDuration = 0; 
+    }
+
+    if (maxDuration >= duration) {
+      minDuration = minDuration - (maxDuration - duration);
+      maxDuration = duration;
+    }
+
     viewModel.set(MIN_SEEK_DURATION, minDuration);
     viewModel.set(MAX_SEEK_DURATION, maxDuration);
 
-    let newCurrentTime = ((maxDuration - minDuration) / 2 + minDuration);
-
-    if (scrollView.horizontalOffset < padding) {
-      const oneSecondPixelRepresentationFramesView = (viewModel.get(FRAMES_VIEW_WIDTH) / duration) * 1000;
-      const offsetMinusPadding = scrollView.horizontalOffset - viewModel.get(PADDING);
-      const secondsToMove = offsetMinusPadding / oneSecondPixelRepresentationFramesView;
-      newCurrentTime = newCurrentTime + (secondsToMove * 1000);
+    if (shouldChangeCurrentTime) {
+      setCurrentLeftByCurrentTime();
     }
-
-    const oneSecondPixelRepresentationFramesView = (viewModel.get(FRAMES_VIEW_WIDTH) / duration) * 1000;      
-    if (newFramesViewWidth - scrollView.horizontalOffset < padding) {
-      newCurrentTime = maxDuration - (newFramesViewWidth - scrollView.horizontalOffset) * oneSecondPixelRepresentationFramesView;  
-    }
-
-
-    viewModel.set(CURRENT_TIME, newCurrentTime);
-    // viewModel.set(CURRENT_TIME, (maxDuration - minimunDuration)/ 2);
   }
 
-  const moveSeekbarAccordingToPosition = () => {
-    const wrapperSize = locationBox.getActualSize().width;
-    const currentLeft = viewModel.get(CURRENT_LOCATION_LEFT);
-    const positionRepresentation = currentLeft/wrapperSize;
-    const framesViewWidth = framesView.getActualSize().width;
-    const offset = framesViewWidth * (positionRepresentation * 1.5);
-    scrollView.scrollToHorizontalOffset(offset, true);
-  };
+  const setCurrentLeftByCurrentTime = ()=> {
+    const currentLocationBoxWidth = locationBox.getActualSize().width;
+    const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
+    const currentTime = viewModel.get(CURRENT_TIME);
+    const duration = viewModel.get(DURATION);
+    const currentTimePercent = (currentTime / duration) * 100;
+    
+    let newLeft = (currentLocationBoxWidth * (currentTimePercent / 100)) - (currentLocationWidth / 2);
+    if (newLeft <= 0) {
+      newLeft = 0;
+    }
+
+    if(newLeft + currentLocationWidth >= currentLocationBoxWidth) {
+      newLeft = currentLocationBoxWidth - currentLocationWidth; 
+    }
+
+    viewModel.set(CURRENT_LOCATION_LEFT, newLeft);
+       
+  }
 
   const moveCurrentLocationBox = () => {
     // video.pause();
@@ -182,13 +258,14 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
 
     viewModel.set(CURRENT_LOCATION_LEFT, newLocation);
     // video.seekToTime(newLocation, seekMethod);
-    calcLocationBoxTimeRepresentation();
+    // calcLocationBoxTimeRepresentation();
     // video.play();
   }
 
   
   const handleScroll = event => {
     // video.pause();
+    return; // disable function for development
     const framesViewWidth = viewModel.get(FRAMES_VIEW_WIDTH);
     const min = viewModel.get(MIN_SEEK_DURATION);
     const max = viewModel.get(MAX_SEEK_DURATION);
@@ -197,7 +274,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
     const prevTime = viewModel.get(CURRENT_TIME);
     isForward = newCurrentTime > prevTime;
     if(!viewModel.get(IS_PLAYING)) {
-      viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
+      // viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
       video.seekToTime(Math.round(newCurrentTime), seekMethod);
       // video.play();
     }
@@ -226,6 +303,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   }
 
   viewModel.onTick = ()=> {// runs every 200 ms
+    return;// disable function for development
     const currentTime = Math.floor(video.getCurrentTime()/1000);
     if (currentTime !== prevTime) { // used to make sure moveTime gets called every second not 200 ms
       prevTime = currentTime;
@@ -238,7 +316,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
     const duration = viewModel.get(DURATION);
     const max = viewModel.get(MAX_SEEK_DURATION);
     const newCurrentTime = time * 1000;
-    viewModel.set(CURRENT_TIME, newCurrentTime);
+    // viewModel.set(CURRENT_TIME, newCurrentTime);
 
     const offset = (framesViewWidth/duration) * newCurrentTime;
     scrollView.scrollToHorizontalOffset(offset, true);
@@ -248,13 +326,18 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   }
 
   viewModel.incrementSec = ()=> {
-    const currentTime = video.getCurrentTime();
-    video.seekToTime(currentTime + 100, seekMethod);
+    // const currentTime = video.getCurrentTime();
+    // video.seekToTime(currentTime + 100, seekMethod);
+    const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
+    viewModel.set(CURRENT_LOCATION_WIDTH, currentLocationWidth + 20);
   }
 
   viewModel.decrementSec = ()=> {
-    const currentTime = video.getCurrentTime();
-    video.seekToTime(currentTime - 100, seekMethod);
+    const offset = scrollView.horizontalOffset;
+    console.log(offset);
+    scrollView.scrollToHorizontalOffset(offset-1);
+    // const currentTime = video.getCurrentTime();
+    // video.seekToTime(currentTime - 100, seekMethod);
   }
 
   viewModel.isReady = ()=> {// Mother of all hacks to solves IOS not seeking in 100 ms jumps
@@ -264,8 +347,9 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
       video.pause();
       video.seekToTime(0);
     }, 1500);
-    viewModel.set(DURATION, duration);
-    calcLocationBoxTimeRepresentation();
+    viewModel.set(DURATION, 100000);
+    calculateFramesViewWidth();
+    // calcLocationBoxTimeRepresentation();
   }
 
   return viewModel;
