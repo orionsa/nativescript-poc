@@ -26,6 +26,7 @@ let disableDragFlag = false; // flag to fix conflict between drag and pinch on i
 let prevScale = 1;
 let isForward = true;// flag that represents seek and scroll direction;
 let prevTime = 0;
+let disableScrollFlag = false;
 
 const msToHHMMSS = ms => {
   let seconds = parseInt((ms/1000)%60)
@@ -58,8 +59,8 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   viewModel.set(CURRENT_TIME, 0);
   viewModel.set(FRAMES_VIEW_WIDTH,100);
   viewModel.set(IS_PLAYING, false);
-  viewModel.set("url", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
-  // viewModel.set("url", "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2020-12-11_06-09/0/5fd30d243fdb230010a41a83/COMMON/1080/playlist.m3u8");
+  // viewModel.set("url", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
+  viewModel.set("url", "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2020-12-11_06-09/0/5fd30d243fdb230010a41a83/COMMON/1080/playlist.m3u8");
   viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)")
   viewModel.set(PADDING, 0);
 
@@ -112,18 +113,17 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
     const duration = viewModel.get(DURATION);
     const currentTimePercent = (currentTime / duration) * 100;
     scrollView.scrollToHorizontalOffset(viewModel.get(FRAMES_VIEW_WIDTH) * (currentTimePercent / 100));
-
-
   }
 
   viewModel.handlePinch = args => {
     const { scale, state } = args;
     const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
-    let newWidth = currentLocationWidth + ((scale - prevScale) * 50);
+    let newWidth = currentLocationWidth + ((scale - prevScale) * -50);
     
     prevScale = scale.toFixed(2); 
     disableDragFlag = true;
-    scrollView.off("scroll", handleScroll);
+    disableScrollFlag = true;
+    // scrollView.off("scroll", handleScroll);
 
     if (newWidth > locationBox.getActualSize().width) {
       newWidth = locationBox.getActualSize().width;
@@ -138,7 +138,8 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
       setTimeout(()=> {
         disableDragFlag = false;
         prevScale = 1;
-        scrollView.on("scroll", handleScroll);
+        disableScrollFlag = false;
+        // scrollView.on("scroll", handleScroll);
       }, 250);
     }
 
@@ -267,6 +268,9 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
 
   
   const handleScroll = event => {
+    if(disableScrollFlag) {
+      return;
+    }
     const framesViewWidth = viewModel.get(FRAMES_VIEW_WIDTH);
     const max = viewModel.get(MAX_SEEK_DURATION);
     const trackDurationMS = viewModel.get(DURATION); 
@@ -300,6 +304,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
     if (isPlaying) {
       video.pause();
     } else {
+      disableScrollFlag = true;
       video.play();
     };
 
@@ -309,11 +314,12 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   viewModel.onTick = ()=> {// runs every 200 ms
     const currentTime = Math.floor(video.getCurrentTime()/1000);
     if (currentTime !== prevTime) { // used to make sure moveTime gets called every second not 200 ms
+      disableScrollFlag = true;
       prevTime = currentTime;
       moveTime(currentTime);
     }
   }
-  
+
   const moveTime = time => {
     // function that gets called every second when playing video
     const max = viewModel.get(MAX_SEEK_DURATION);
@@ -380,6 +386,11 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
       calcLocationBoxTimeRepresentation();
     }, 1500);
     viewModel.set(DURATION, duration);
+  }
+
+  viewModel.addScrollEventListener = args => {
+    const { action } = args;
+    disableScrollFlag = action === "down";
   }
 
   return viewModel;

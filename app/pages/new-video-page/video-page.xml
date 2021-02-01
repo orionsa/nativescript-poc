@@ -4,7 +4,7 @@
   xmlns:exoplayer="nativescript-exoplayer"
 >
   <!-- xmlns:VideoPlayer="nativescript-videoplayer" -->
-  <GridLayout rows="auto *">
+  <GridLayout rows="auto *" backgroundColor="#03045e">
     <StackLayout row="0" class="video-player">
         <exoplayer:Video 
           id="videoPlayer"
@@ -46,7 +46,7 @@
         </FlexboxLayout>
         <ScrollView row="1" id="scrollView" class="list-wrapper" orientation="horizontal" scrollBarIndicatorVisible="true">       
             <StackLayout id="framesView" orientation="horizontal" paddingLeft="{{ padding }}" paddingRight="{{ padding }}">
-              <AbsoluteLayout width="{{ framesViewWidth }}" height="60" backgroundImage="{{ gradient }}"/>
+              <AbsoluteLayout touch="{{ addScrollEventListener }}" width="{{ framesViewWidth }}" height="60" backgroundImage="{{ gradient }}"/>
             </StackLayout>
         </ScrollView>
         <AbsoluteLayout row="1" horizontalAlignment='center' class="current-time-marker" />
