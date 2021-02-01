@@ -49,7 +49,7 @@ const generateGradient = width => {
 }
 
 
-function createViewModel({ locationBox, scrollView, framesView, video }) {
+function createViewModel({ locationBox, scrollView, video }) {
   const viewModel = new Observable();
   viewModel.set(CURRENT_LOCATION_LEFT, 0);
   viewModel.set(CURRENT_LOCATION_WIDTH, cw);
@@ -376,7 +376,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
     video.seekToTime(newCurrentTime, seekMethod);
   }
 
-  viewModel.isReady = ()=> {// Mother of all hacks to solves IOS not seeking in 100 ms jumps
+  viewModel.isReady = ()=> {// Mother of all hacks to solve IOS not seeking in 100 ms jumps
     const duration = video.getDuration();
     setTimeout(()=> {
       video.pause();
