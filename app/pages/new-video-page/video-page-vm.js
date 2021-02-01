@@ -95,7 +95,6 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   }
 
   const moveSeekbarAccordingToLocation = ()=> {
-    // calcLocationBoxTimeRepresentationNEW();
     calcCurrentTimeFromLocation();
     const currentLocationBoxWidth = locationBox.getActualSize().width;
     const possibleLeft = currentLocationBoxWidth - viewModel.get(CURRENT_LOCATION_WIDTH);
@@ -137,7 +136,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
       }, 250);
     }
 
-    calcLocationBoxTimeRepresentationNEW(true);
+    calcLocationBoxTimeRepresentation(true);
     calculateFramesViewWidth();
     moveSeekbarAccordingToCurrentTime();
     // const ms = calculateLocationBoxTimeRepresentationMs();
@@ -192,7 +191,7 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
     viewModel.set(PADDING, padding);  
   }
 
-  const calcLocationBoxTimeRepresentationNEW = (shouldChangeCurrentTime = false) => {
+  const calcLocationBoxTimeRepresentation = (shouldChangeCurrentTime = false) => {
     const duration = viewModel.get(DURATION);
     const currentTime = viewModel.get(CURRENT_TIME);
     const msRepresentation = calculateLocationBoxTimeRepresentationMs(); 
@@ -265,25 +264,25 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
   
   const handleScroll = event => {
     // video.pause();
-    return; // disable function for development
     const framesViewWidth = viewModel.get(FRAMES_VIEW_WIDTH);
-    const min = viewModel.get(MIN_SEEK_DURATION);
+    // const min = viewModel.get(MIN_SEEK_DURATION);
     const max = viewModel.get(MAX_SEEK_DURATION);
     const trackDurationMS = viewModel.get(DURATION); 
     const newCurrentTime = trackDurationMS * (event.scrollX / framesViewWidth);
     const prevTime = viewModel.get(CURRENT_TIME);
     isForward = newCurrentTime > prevTime;
     if(!viewModel.get(IS_PLAYING)) {
-      // viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
-      video.seekToTime(Math.round(newCurrentTime), seekMethod);
+      viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
+      // video.seekToTime(Math.round(newCurrentTime), seekMethod);
       // video.play();
     }
     
     if ((newCurrentTime > max / 2) && isForward) {
       moveCurrentLocationBox();
     }
-    if ((newCurrentTime - (max / 2) < min) && !isForward) {
-      moveCurrentLocationBox();
+
+    if (!isForward && (newCurrentTime + max / 2) > max) {
+        moveCurrentLocationBox();
     }
   }
   
@@ -347,9 +346,9 @@ function createViewModel({ locationBox, scrollView, framesView, video }) {
       video.pause();
       video.seekToTime(0);
     }, 1500);
-    viewModel.set(DURATION, 100000);
+    viewModel.set(DURATION, duration);
     calculateFramesViewWidth();
-    // calcLocationBoxTimeRepresentation();
+    calcLocationBoxTimeRepresentation();
   }
 
   return viewModel;
