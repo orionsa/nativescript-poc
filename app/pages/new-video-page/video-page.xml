@@ -44,9 +44,9 @@
           <Label color="white" text="{{ formatTime(minSeekDuration) }}" />
           <Label color="white" text="{{ formatTime(maxSeekDuration) }}" /> 
         </FlexboxLayout>
-        <ScrollView row="1" id="scrollView" class="list-wrapper" orientation="horizontal" scrollBarIndicatorVisible="true">       
+        <ScrollView row="1" id="scrollView" class="list-wrapper" orientation="horizontal" scrollBarIndicatorVisible="true" touch="{{ addScrollEventListener }}">       
             <StackLayout id="framesView" orientation="horizontal" paddingLeft="{{ padding }}" paddingRight="{{ padding }}">
-              <Label top="5" touch="{{ addScrollEventListener }}" width="{{ firstChildWidth }}" maxWidth="5955" height="60" backgroundImage="{{ gradient }}"/>
+              <Label width="{{ firstChildWidth }}" maxWidth="5955" height="60" backgroundImage="{{ gradient }}"/>
             </StackLayout>
         </ScrollView>
         <AbsoluteLayout row="1" horizontalAlignment='center' class="current-time-marker" />

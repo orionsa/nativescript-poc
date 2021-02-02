@@ -1,6 +1,7 @@
 const Observable = require("tns-core-modules/data/observable").Observable;
 const Label = require("tns-core-modules/ui/label").Label
 const { isAndroid } = require("tns-core-modules/platform");
+const { NEW_CAMERA_URLS } = require("../../utils/constans");
 
 let seekMethod = null;
 if (isAndroid) {
@@ -20,6 +21,7 @@ const IS_PLAYING = "isPlaying";
 const PADDING = "padding";
 const GRADIENT = "gradient";
 const FIRST_CHILD_WIDTH = "firstChildWidth";
+const URL = "url";
 
 let cl = 0; // current location left for local use;
 let disableDragFlag = false; // flag to fix conflict between drag and pinch on ios;
@@ -42,20 +44,14 @@ const msToHHMMSS = ms => {
 
 const generateGradient = width => {
   let colors = "#43C6AC, #191654";
-  for (let i = 0; i < (width / 1000); i++) {
-    
-    // console.log(colors.length);
+  for (let i = 0; i < (width / 1000); i++) {    
     if (colors.length > 100) {// fix android string length
       break;
     }
 
     colors += ",#43C6AC, #191654";
   }
-
-  // view.style.backgroundImage
-
-  // const grad = `linear-gradient(to left, ${colors})`;
-  // console.log("length ", grad.length);  
+ 
   return `linear-gradient(to left, ${colors})`
 }
 
@@ -71,7 +67,7 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
   viewModel.set(FRAMES_VIEW_WIDTH,100);
   viewModel.set(IS_PLAYING, false);
   // viewModel.set("url", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
-  viewModel.set("url", "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2020-12-11_06-09/0/5fd30d243fdb230010a41a83/COMMON/1080/playlist.m3u8");
+  viewModel.set(URL, NEW_CAMERA_URLS.first);
   viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)");
   viewModel.set(PADDING, 0);
   viewModel.set(FIRST_CHILD_WIDTH, 0);
@@ -106,7 +102,7 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
     const newCurrentTime = msInPixel * offset;
     
     viewModel.set(CURRENT_TIME, newCurrentTime);
-    // video.seekToTime(newCurrentTime, seekMethod);
+    video.seekToTime(newCurrentTime, seekMethod);
   }
 
   const moveSeekbarAccordingToLocation = ()=> {
@@ -330,7 +326,9 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
     // }
 
     viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
-    // video.seekToTime(Math.round(newCurrentTime), seekMethod);
+    if (!isAndroid) {
+      video.seekToTime(Math.round(newCurrentTime), seekMethod);
+    }
     
     if ((newCurrentTime > max / 2) && isForward) {
       moveCurrentLocationBox();
@@ -436,6 +434,17 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
 
   viewModel.addScrollEventListener = args => {
     const { action } = args;
+
+    if (isAndroid && action === "up") {
+      // in android the seek is not in real time but only when the user lifts his finger.
+      const newCurrentTime = viewModel.get(CURRENT_TIME);
+      video.seekToTime(Math.round(newCurrentTime), seekMethod);
+    } 
+
+    if (isAndroid) {
+      disableScrollFlag = false;  
+    };
+
     disableScrollFlag = action === "down";
   }
 

@@ -12,3 +12,8 @@ export const TENNIS_URLS = [
   "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2020-12-11_06-09/1/5fd30d243fdb230010a41a84/COMMON/1080/playlist.m3u8"
   // "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2020-12-11_06-09/1/5fd30d243fdb230010a41a84/COMMON/1080/playlist.m3u8",
 ];
+
+export const NEW_CAMERA_URLS = {
+  first: "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2021-01-20_15-04/0/600846642a14980010af8054/COMMON/1080/playlist.m3u8",
+  second: "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2021-01-20_15-04/1/600846642a14980010af8055/COMMON/1080/playlist.m3u8"
+}
