@@ -21,7 +21,9 @@ const IS_PLAYING = "isPlaying";
 const PADDING = "padding";
 const GRADIENT = "gradient";
 const FIRST_CHILD_WIDTH = "firstChildWidth";
-const URL = "url";
+const URL_1 = "url1";
+const URL_2 = "url2";
+const IS_FIRST_PLAYER_ACTIVE = "isFirstPlayerActive";
 
 let cl = 0; // current location left for local use;
 let disableDragFlag = false; // flag to fix conflict between drag and pinch on ios;
@@ -56,7 +58,7 @@ const generateGradient = width => {
 }
 
 
-function createViewModel({ locationBox, scrollView, video, framesView }) {
+function createViewModel({ locationBox, scrollView, firstVideo, framesView, secondVideo }) {
   const viewModel = new Observable();
   viewModel.set(CURRENT_LOCATION_LEFT, 0);
   viewModel.set(CURRENT_LOCATION_WIDTH, 100);
@@ -67,12 +69,15 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
   viewModel.set(FRAMES_VIEW_WIDTH,100);
   viewModel.set(IS_PLAYING, false);
   // viewModel.set("url", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
-  viewModel.set(URL, NEW_CAMERA_URLS.first);
+  viewModel.set(URL_1, NEW_CAMERA_URLS.first);
+  viewModel.set(URL_2, NEW_CAMERA_URLS.second);
+  // viewModel.set(URL_1, "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
+  // viewModel.set(URL_2, "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
   viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)");
   viewModel.set(PADDING, 0);
   viewModel.set(FIRST_CHILD_WIDTH, 0);
-
-
+  viewModel.set(IS_FIRST_PLAYER_ACTIVE, true);
+  let video = firstVideo;
 
   viewModel.handleDragCurrentTime = args => {
     const { state, deltaX } = args;
@@ -420,16 +425,23 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
     video.seekToTime(newCurrentTime, seekMethod);
   }
 
-  viewModel.isReady = ()=> {// Mother of all hacks to solve IOS not seeking in 100 ms jumps
+  viewModel.isFirstPlayerReady = () => {// Mother of all hacks to solve IOS not seeking in 100 ms jumps
     const duration = video.getDuration();
     setTimeout(()=> {
-      video.pause();
-      video.seekToTime(0);
+      firstVideo.pause();
+      firstVideo.seekToTime(0);
       viewModel.set(CURRENT_TIME, 0);
       calculateFramesViewWidth();
       calcLocationBoxTimeRepresentation();
     }, 1500);
     viewModel.set(DURATION, duration);
+  }
+
+  viewModel.isSecondPlayerReady = () => {// Mother of all hacks to solve IOS not seeking in 100 ms jumps
+    setTimeout(()=> {
+      secondVideo.pause();
+      secondVideo.seekToTime(0);
+    }, 1500);
   }
 
   viewModel.addScrollEventListener = args => {
@@ -446,6 +458,31 @@ function createViewModel({ locationBox, scrollView, video, framesView }) {
     };
 
     disableScrollFlag = action === "down";
+  }
+
+  viewModel.changeVideo = args => {
+    const { direction } = args;
+    if(direction === 4 || direction === 8) {
+      const isFirstPlayerActive = viewModel.get(IS_FIRST_PLAYER_ACTIVE);
+      pauseCurrentPlayer();
+      video = isFirstPlayerActive ? secondVideo : firstVideo;
+      viewModel.set(IS_FIRST_PLAYER_ACTIVE, !isFirstPlayerActive);
+      const isPlaying = viewModel.get(IS_PLAYING);
+      const currentTime = viewModel.get(CURRENT_TIME);
+      video.seekToTime(currentTime, seekMethod);
+      if(isPlaying) {
+        video.play();
+      }
+    }
+  }
+
+  const pauseCurrentPlayer = ()=> {
+    const isFirstPlayerActive = viewModel.get(IS_FIRST_PLAYER_ACTIVE);
+    if(isFirstPlayerActive) {
+      firstVideo.pause();
+    } else {
+      secondVideo.pause();
+    }
   }
 
   return viewModel;

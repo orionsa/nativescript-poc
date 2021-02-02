@@ -3,33 +3,33 @@
   loaded="onPageLoaded"
   xmlns:exoplayer="nativescript-exoplayer"
 >
-  <!-- xmlns:VideoPlayer="nativescript-videoplayer" -->
   <GridLayout rows="auto *" backgroundColor="#03045e">
-    <StackLayout row="0" class="video-player">
-        <exoplayer:Video 
-          id="videoPlayer"
-          controls="false" 
-          finished="{{ videoFinished }}"
-          loop="true" 
-          autoplay="true" 
-          height="280" 
-          src="{{ url }}"
-          observeCurrentTime="true"
-          currentTimeUpdated="{{ onTick }}"
-          playbackReady="{{ isReady }}"
-        />
-        <!-- <VideoPlayer:Video 
-          id="videoPlayer"
-          controls="true" 
-          finished="{{ videoFinished }}"
-          loop="true" 
-          autoplay="false" 
-          height="280" 
-          src="http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"
-          observeCurrentTime="true"
-          currentTimeUpdated="{{ onTick }}"
-        /> -->
-      <Label text="new video page" />
+    <StackLayout row="0" class="video-player" swipe="{{ changeVideo }}">
+      <exoplayer:Video 
+        id="videoPlayer"
+        controls="false" 
+        finished="{{ videoFinished }}"
+        loop="true" 
+        autoplay="true" 
+        height="{{ isFirstPlayerActive ? '190' : '0' }}" 
+        src="{{ url1 }}"
+        observeCurrentTime="true"
+        currentTimeUpdated="{{ onTick }}"
+        playbackReady="{{ isFirstPlayerReady }}"
+      />
+      <exoplayer:Video 
+        id="secondVideoPlayer"
+        controls="false" 
+        finished="{{ videoFinished }}"
+        loop="true" 
+        autoplay="true" 
+        height="{{ isFirstPlayerActive ? '0' : '190' }}"
+        src="{{ url2 }}"
+        observeCurrentTime="true"
+        currentTimeUpdated="{{ onTick }}"
+        playbackReady="{{ isSecondPlayerReady }}"
+      />
+      <!-- <Label text="new video page" /> -->
     </StackLayout>
     <StackLayout row="1" pinch="{{ handlePinch }}">
       <FlexboxLayout class="player-controls">
