@@ -1,9 +1,10 @@
 const Observable = require("tns-core-modules/data/observable").Observable;
+const Label = require("tns-core-modules/ui/label").Label
 const { isAndroid } = require("tns-core-modules/platform");
 
 let seekMethod = null;
 if (isAndroid) {
-  const { SEEK_CLOSEST, SEEK_CLOSEST_SYNC } = android.media.MediaPlayer;
+  const { SEEK_CLOSEST } = android.media.MediaPlayer;
   seekMethod = SEEK_CLOSEST;
 }
 
@@ -18,10 +19,9 @@ const FRAMES_VIEW_WIDTH = "framesViewWidth";
 const IS_PLAYING = "isPlaying";
 const PADDING = "padding";
 const GRADIENT = "gradient";
+const FIRST_CHILD_WIDTH = "firstChildWidth";
 
-// const trackDurationMS = 1000 * 1000;// fake track duration will be replaced by actual video length
 let cl = 0; // current location left for local use;
-let cw = 100; // current location width for local use;
 let disableDragFlag = false; // flag to fix conflict between drag and pinch on ios;
 let prevScale = 1;
 let isForward = true;// flag that represents seek and scroll direction;
@@ -43,16 +43,27 @@ const msToHHMMSS = ms => {
 const generateGradient = width => {
   let colors = "#43C6AC, #191654";
   for (let i = 0; i < (width / 1000); i++) {
+    
+    // console.log(colors.length);
+    if (colors.length > 100) {// fix android string length
+      break;
+    }
+
     colors += ",#43C6AC, #191654";
   }
+
+  // view.style.backgroundImage
+
+  // const grad = `linear-gradient(to left, ${colors})`;
+  // console.log("length ", grad.length);  
   return `linear-gradient(to left, ${colors})`
 }
 
 
-function createViewModel({ locationBox, scrollView, video }) {
+function createViewModel({ locationBox, scrollView, video, framesView }) {
   const viewModel = new Observable();
   viewModel.set(CURRENT_LOCATION_LEFT, 0);
-  viewModel.set(CURRENT_LOCATION_WIDTH, cw);
+  viewModel.set(CURRENT_LOCATION_WIDTH, 100);
   viewModel.set(DURATION, 0);
   viewModel.set(MIN_SEEK_DURATION, 0);
   viewModel.set(MAX_SEEK_DURATION, 0);
@@ -61,8 +72,9 @@ function createViewModel({ locationBox, scrollView, video }) {
   viewModel.set(IS_PLAYING, false);
   // viewModel.set("url", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
   viewModel.set("url", "https://vod.myplay.com/SBG3/5f96d0259bba7b0010c186a9/2020-12-11_06-09/0/5fd30d243fdb230010a41a83/COMMON/1080/playlist.m3u8");
-  viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)")
+  viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)");
   viewModel.set(PADDING, 0);
+  viewModel.set(FIRST_CHILD_WIDTH, 0);
 
 
 
@@ -94,7 +106,7 @@ function createViewModel({ locationBox, scrollView, video }) {
     const newCurrentTime = msInPixel * offset;
     
     viewModel.set(CURRENT_TIME, newCurrentTime);
-    video.seekToTime(newCurrentTime, seekMethod);
+    // video.seekToTime(newCurrentTime, seekMethod);
   }
 
   const moveSeekbarAccordingToLocation = ()=> {
@@ -118,7 +130,7 @@ function createViewModel({ locationBox, scrollView, video }) {
   viewModel.handlePinch = args => {
     const { scale, state } = args;
     const currentLocationWidth = viewModel.get(CURRENT_LOCATION_WIDTH);
-    let newWidth = currentLocationWidth + ((scale - prevScale) * -50);
+    let newWidth = Math.round(currentLocationWidth + ((scale - prevScale) * -50));
     
     prevScale = scale.toFixed(2); 
     disableDragFlag = true;
@@ -128,10 +140,10 @@ function createViewModel({ locationBox, scrollView, video }) {
     if (newWidth > locationBox.getActualSize().width) {
       newWidth = locationBox.getActualSize().width;
     }
-
     if (newWidth <= 0) {
-      newWidth = 0; 
+      newWidth = 1; 
     }
+    // console.log("newWidth ", newWidth);
 
     viewModel.set(CURRENT_LOCATION_WIDTH, newWidth);
     if (state === 3) {
@@ -184,15 +196,49 @@ function createViewModel({ locationBox, scrollView, video }) {
     return msInPixle;
   }
 
+  const createLabels = ()=> {
+    // this method is Hack to overcome elements with over 3955 width disappearance; 
+    const totalWidth = viewModel.get(FRAMES_VIEW_WIDTH);
+    const maxAllwedWidth = 5955;
+    const amountOfLabels = Math.floor(totalWidth/maxAllwedWidth);
+    const firstChildWidth = totalWidth - (maxAllwedWidth * amountOfLabels);
+    const gradient = generateGradient(firstChildWidth);
+    const labelsToAdd = Math.ceil(totalWidth/maxAllwedWidth) - framesView.getChildrenCount();
+
+    viewModel.set(FIRST_CHILD_WIDTH, firstChildWidth);
+    viewModel.set(GRADIENT, gradient);
+    
+    if (labelsToAdd > 0) {
+      for(let i = 0; i < labelsToAdd; i++) {
+        const singleLabel = new Label();
+        singleLabel.style.width = maxAllwedWidth;
+        singleLabel.style.backgroundImage = generateGradient(maxAllwedWidth);
+        singleLabel.style.height = 60;
+        singleLabel.addEventListener("touch", viewModel.addScrollEventListener, this);
+
+        framesView.addChild(singleLabel);
+      }
+      return;
+    }
+
+    if(labelsToAdd < 0) {
+      for(let i = labelsToAdd * -1; i > 0; i--) {
+        const currentChild = framesView.getChildAt(i);
+        if(currentChild) {
+          framesView.removeChild(currentChild);
+        }
+      }
+    }
+  }
+
   const calculateFramesViewWidth = ()=> {
     const scrollViewWidth = scrollView.getActualSize().width;
     const padding = scrollViewWidth / 2; 
     const currentLocationWidthPercent = calculateCurrentLocationPercent();
     const framesViewWidth = scrollViewWidth / (currentLocationWidthPercent / 100);
-    const gradient = generateGradient(framesViewWidth);
-
-    viewModel.set(GRADIENT, gradient);
     viewModel.set(FRAMES_VIEW_WIDTH, framesViewWidth);
+    
+    createLabels();
     viewModel.set(PADDING, padding);  
   }
 
@@ -284,7 +330,7 @@ function createViewModel({ locationBox, scrollView, video }) {
     // }
 
     viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
-    video.seekToTime(Math.round(newCurrentTime), seekMethod);
+    // video.seekToTime(Math.round(newCurrentTime), seekMethod);
     
     if ((newCurrentTime > max / 2) && isForward) {
       moveCurrentLocationBox();

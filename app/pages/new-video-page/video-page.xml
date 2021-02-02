@@ -46,7 +46,7 @@
         </FlexboxLayout>
         <ScrollView row="1" id="scrollView" class="list-wrapper" orientation="horizontal" scrollBarIndicatorVisible="true">       
             <StackLayout id="framesView" orientation="horizontal" paddingLeft="{{ padding }}" paddingRight="{{ padding }}">
-              <AbsoluteLayout touch="{{ addScrollEventListener }}" width="{{ framesViewWidth }}" height="60" backgroundImage="{{ gradient }}"/>
+              <Label top="5" touch="{{ addScrollEventListener }}" width="{{ firstChildWidth }}" maxWidth="5955" height="60" backgroundImage="{{ gradient }}"/>
             </StackLayout>
         </ScrollView>
         <AbsoluteLayout row="1" horizontalAlignment='center' class="current-time-marker" />
