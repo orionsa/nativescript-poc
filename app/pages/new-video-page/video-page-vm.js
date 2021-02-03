@@ -454,7 +454,6 @@ function createViewModel({ locationBox, scrollView, firstVideo, framesView, seco
 
   viewModel.changeVideo = args => {
     const { direction } = args;
-    console.log("direction", direction)
     if(direction === 4 || direction === 8) {
       const isFirstPlayerActive = viewModel.get(IS_FIRST_PLAYER_ACTIVE);
       pauseCurrentPlayer();
