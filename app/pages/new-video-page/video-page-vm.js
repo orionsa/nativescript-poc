@@ -31,6 +31,8 @@ let prevScale = 1;
 let isForward = true;// flag that represents seek and scroll direction;
 let prevTime = 0;
 let disableScrollFlag = false;
+let androidSeekTimeout = null;// variable to keep reference to android seek timeout;
+const timeout = 250;
 
 const msToHHMMSS = ms => {
   let seconds = parseInt((ms/1000)%60)
@@ -50,7 +52,6 @@ const generateGradient = width => {
     if (colors.length > 100) {// fix android string length
       break;
     }
-
     colors += ",#43C6AC, #191654";
   }
  
@@ -71,8 +72,6 @@ function createViewModel({ locationBox, scrollView, firstVideo, framesView, seco
   // viewModel.set("url", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
   viewModel.set(URL_1, NEW_CAMERA_URLS.first);
   viewModel.set(URL_2, NEW_CAMERA_URLS.second);
-  // viewModel.set(URL_1, "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
-  // viewModel.set(URL_2, "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8");
   viewModel.set(GRADIENT, "linear-gradient(to left, #43C6AC, #191654)");
   viewModel.set(PADDING, 0);
   viewModel.set(FIRST_CHILD_WIDTH, 0);
@@ -321,19 +320,12 @@ function createViewModel({ locationBox, scrollView, firstVideo, framesView, seco
     const framesViewWidth = viewModel.get(FRAMES_VIEW_WIDTH);
     const max = viewModel.get(MAX_SEEK_DURATION);
     const trackDurationMS = viewModel.get(DURATION); 
-    const newCurrentTime = trackDurationMS * (event.scrollX / framesViewWidth);
+    const newCurrentTime = Math.round(trackDurationMS * (event.scrollX / framesViewWidth)); 
     const prevTime = viewModel.get(CURRENT_TIME);
     isForward = newCurrentTime > prevTime;
-    // if(!viewModel.get(IS_PLAYING)) {
-    //   viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
-    //   video.seekToTime(Math.round(newCurrentTime), seekMethod);
-    //   // video.play();
-    // }
 
-    viewModel.set(CURRENT_TIME, Math.round(newCurrentTime));
-    if (!isAndroid) {
-      video.seekToTime(Math.round(newCurrentTime), seekMethod);
-    }
+    viewModel.set(CURRENT_TIME, newCurrentTime);
+    handleSeek(newCurrentTime);
     
     if ((newCurrentTime > max / 2) && isForward) {
       moveCurrentLocationBox();
@@ -447,11 +439,11 @@ function createViewModel({ locationBox, scrollView, firstVideo, framesView, seco
   viewModel.addScrollEventListener = args => {
     const { action } = args;
 
-    if (isAndroid && action === "up") {
-      // in android the seek is not in real time but only when the user lifts his finger.
-      const newCurrentTime = viewModel.get(CURRENT_TIME);
-      video.seekToTime(Math.round(newCurrentTime), seekMethod);
-    } 
+    // if (isAndroid && action === "up") {
+    //   // in android the seek is not in real time but only when the user lifts his finger.
+    //   const newCurrentTime = viewModel.get(CURRENT_TIME);
+    //   video.seekToTime(Math.round(newCurrentTime), seekMethod);
+    // } 
 
     if (isAndroid) {
       disableScrollFlag = false;  
@@ -462,6 +454,7 @@ function createViewModel({ locationBox, scrollView, firstVideo, framesView, seco
 
   viewModel.changeVideo = args => {
     const { direction } = args;
+    console.log("direction", direction)
     if(direction === 4 || direction === 8) {
       const isFirstPlayerActive = viewModel.get(IS_FIRST_PLAYER_ACTIVE);
       pauseCurrentPlayer();
@@ -482,6 +475,18 @@ function createViewModel({ locationBox, scrollView, firstVideo, framesView, seco
       firstVideo.pause();
     } else {
       secondVideo.pause();
+    }
+  }
+
+  const handleSeek = time => {
+    // helper method to handle seek on different platforms;
+    if(!isAndroid) {// case IOS the player can handle rapid seeking
+      video.seekToTime(time);
+    } else {// case Android we set timeout to prevent rapid seeking
+      clearTimeout(androidSeekTimeout);
+      androidSeekTimeout = setTimeout(()=> {
+        video.seekToTime(time);
+      }, timeout)
     }
   }
 

@@ -5,31 +5,36 @@
 >
   <GridLayout rows="auto *" backgroundColor="#03045e">
     <StackLayout row="0" class="video-player" swipe="{{ changeVideo }}">
-      <exoplayer:Video 
-        id="videoPlayer"
-        controls="false" 
-        finished="{{ videoFinished }}"
-        loop="true" 
-        autoplay="true" 
-        height="{{ isFirstPlayerActive ? '190' : '0' }}" 
-        src="{{ url1 }}"
-        observeCurrentTime="true"
-        currentTimeUpdated="{{ onTick }}"
-        playbackReady="{{ isFirstPlayerReady }}"
-      />
-      <exoplayer:Video 
-        id="secondVideoPlayer"
-        controls="false" 
-        finished="{{ videoFinished }}"
-        loop="true" 
-        autoplay="true" 
-        height="{{ isFirstPlayerActive ? '0' : '190' }}"
-        src="{{ url2 }}"
-        observeCurrentTime="true"
-        currentTimeUpdated="{{ onTick }}"
-        playbackReady="{{ isSecondPlayerReady }}"
-      />
-      <!-- <Label text="new video page" /> -->
+      <AbsoluteLayout height="190" width="338" visibility="{{ isFirstPlayerActive ? 'visible' : 'collapsed' }}">
+        <exoplayer:Video 
+          id="videoPlayer"
+          controls="false" 
+          finished="{{ videoFinished }}"
+          loop="true" 
+          autoplay="true"  
+          src="{{ url1 }}"
+          height="190"
+          width="338"
+          observeCurrentTime="true"
+          currentTimeUpdated="{{ onTick }}"
+          playbackReady="{{ isFirstPlayerReady }}"
+        />
+      </AbsoluteLayout>
+      <AbsoluteLayout height="190" width="338" visibility="{{ isFirstPlayerActive ? 'collapsed' : 'visible' }}">
+        <exoplayer:Video 
+          id="secondVideoPlayer"
+          controls="false" 
+          finished="{{ videoFinished }}"
+          loop="true" 
+          autoplay="true" 
+          src="{{ url2 }}"
+          height="190"
+          width="338"
+          observeCurrentTime="true"
+          currentTimeUpdated="{{ onTick }}"
+          playbackReady="{{ isSecondPlayerReady }}"
+        />
+      </AbsoluteLayout>
     </StackLayout>
     <StackLayout row="1" pinch="{{ handlePinch }}">
       <FlexboxLayout class="player-controls">
